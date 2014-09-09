@@ -1,1 +1,1 @@
-exclude: [Rakefile, Gemfile, Gemfile.lock]
+exclude: [Rakefile, Gemfile, Gemfile.lock,/vendor]
