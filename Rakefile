@@ -28,10 +28,16 @@ task :travis do
   Dir.mktmpdir do |dir|
     dir = File.join dir, 'site'
     system 'bundle exec rake build'
-    fail "Build failed." unless Dir.exists? destination
+    if Dir.exists? destination
+      puts "Built site to #{destination}"
+    else
+      fail "Build failed."
+    end
     system "git clone --branch #{deploy_branch} #{repo} #{dir}"
-    system %Q(rsync -rt --del --exclude=".git" --exclude=".nojekyll" #{destination} #{dir})
+    system %Q(rsync -rt --del --exclude=".git" --exclude=".nojekyll" #{destination}/* #{dir})
     Dir.chdir dir do
+      puts `git status`
+
       # setup credentials so Travis CI can push to GitHub
       system "git config user.name '#{ENV['GIT_NAME']}'"
       system "git config user.email '#{ENV['GIT_EMAIL']}'"
