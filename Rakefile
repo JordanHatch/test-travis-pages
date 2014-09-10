@@ -28,7 +28,7 @@ task :travis do
   rev = %x(git rev-parse HEAD).strip[0..8]
 
   origin = %x(git config remote.origin.url)
-  friendly_origin_name = origin.sub(/^https:\/\/github.com/,'').sub(/.git$/,'')
+  friendly_origin_name = origin.sub(/^git:\/\/github.com/,'').sub(/.git$/,'').strip
 
   Dir.mktmpdir do |dir|
     dir = File.join dir, 'site'
