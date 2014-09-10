@@ -20,10 +20,10 @@ task :travis do
     next
   end
 
-  repo = ENV['DESTINATION'].gsub(/^git:/, 'https:').strip
-  subdir = ENV['DIRECTORY']
+  repo = ENV.fetch('DESTINATION').gsub(/^git:/, 'https:').strip
+  subdir = ENV.fetch('DIRECTORY')
 
-  deploy_url = repo.gsub %r{https://}, "https://#{ENV['GH_TOKEN']}@"
+  deploy_url = repo.gsub %r{https://}, "https://#{ENV.fetch('GH_TOKEN')}@"
   deploy_branch = 'gh-pages'
   rev = %x(git rev-parse HEAD).strip[0..8]
 
@@ -45,8 +45,8 @@ task :travis do
       puts `git status`
 
       # setup credentials so Travis CI can push to GitHub
-      system "git config user.name '#{ENV['GIT_NAME']}'"
-      system "git config user.email '#{ENV['GIT_EMAIL']}'"
+      system "git config user.name '#{ENV.fetch('GIT_NAME')}'"
+      system "git config user.email '#{ENV.fetch('GIT_EMAIL')}'"
 
       system 'git add --all'
       system "git commit -m 'Built from #{friendly_origin_name}##{rev}'."
