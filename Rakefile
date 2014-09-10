@@ -20,10 +20,15 @@ task :travis do
     next
   end
 
-  repo = %x(git config remote.origin.url).gsub(/^git:/, 'https:').strip
+  repo = ENV['DESTINATION'].gsub(/^git:/, 'https:').strip
+  subdir = ENV['DIRECTORY']
+
   deploy_url = repo.gsub %r{https://}, "https://#{ENV['GH_TOKEN']}@"
-  deploy_branch = repo.match(/github\.io\.git$/) ? 'master' : 'gh-pages'
-  rev = %x(git rev-parse HEAD).strip
+  deploy_branch = 'gh-pages'
+  rev = %x(git rev-parse HEAD).strip[0..8]
+
+  origin = %x(git config remote.origin.url)
+  friendly_origin_name = origin.sub(/^git@github.com:/,'').sub(/.git$/,'')
 
   Dir.mktmpdir do |dir|
     dir = File.join dir, 'site'
@@ -34,7 +39,8 @@ task :travis do
       fail "Build failed."
     end
     system "git clone --branch #{deploy_branch} #{repo} #{dir}"
-    system %Q(rsync -rt --del --exclude=".git" --exclude=".nojekyll" #{destination}/* #{dir})
+    system "mkdir -p #{dir}/#{subdir}"
+    system %Q(rsync -rt --del --exclude=".git" --exclude=".nojekyll" #{destination}/* #{dir}/#{subdir}/)
     Dir.chdir dir do
       puts `git status`
 
@@ -43,7 +49,7 @@ task :travis do
       system "git config user.email '#{ENV['GIT_EMAIL']}'"
 
       system 'git add --all'
-      system "git commit -m 'Built from #{rev}'."
+      system "git commit -m 'Built from #{friendly_origin_name}##{rev}'."
       system "git push -q #{deploy_url} #{deploy_branch}"
     end
   end
